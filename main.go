@@ -1,10 +1,13 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"net/http"
 	"io/ioutil"
+	"log"
+	"os"
 	//"regexp"
+	"html/template"
 	"github.com/codegangsta/negroni"
 	"github.com/xyproto/mooseware"
 	"github.com/PuerkitoBio/goquery"
@@ -25,10 +28,25 @@ func main() {
 		doc, err := goquery.NewDocument(link)
 		if err != nil {
 			//logger.Error("解析页面失败：%s, %s", link, err.Error())
-			//return nil
+			return nil
 		}
 		s := doc.Find("li.j_thread_list.clearfix").Text()
 		fmt.Fprint(w, s)
+
+		t, err := template.ParseFiles("template/index.html")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		data := struct {
+			Title string
+		}{
+			Title: "golang html template demo",
+		}
+		err = t.Execute(os.Stdout, data)
+		if err != nil {
+			log.Fatal(err)
+		}
 	})
 
 	n := negroni.Classic()
