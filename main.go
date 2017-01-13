@@ -1,16 +1,16 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"net/http"
 	"io/ioutil"
 	"log"
 	"os"
 	//"regexp"
-	"html/template"
+	"text/template"
 	"github.com/codegangsta/negroni"
 	"github.com/xyproto/mooseware"
-	"github.com/PuerkitoBio/goquery"
+	//"github.com/PuerkitoBio/goquery"
 )
 
 var (
@@ -18,32 +18,47 @@ var (
 	//threadItemExp = regexp.MustCompile(`"thread/[0123456789]+"`)
 )
 
+// This will be the index.html
+var homeTemplate *template.Template
+
+// This will store all the templates
+var templates *template.Template
+
 func main() {
+	templates, err := template.ParseGlob("template/*.html")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// find the template with the name index.html
+	homeTemplate = templates.Lookup("index.html")
+
 	mux := http.NewServeMux()
 
+	// 启动静态文件服务
+	//mux.HandleFunc("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		link := "http://tieba.baidu.com/f?kw=%D3%A2%D3%EF"
+		//link := "http://tieba.baidu.com/f?kw=%D3%A2%D3%EF"
 		//content, statusCode := httpGet(link)
 		//doc, err := newDocumentFromURL(link)
-		doc, err := goquery.NewDocument(link)
-		if err != nil {
-			//logger.Error("解析页面失败：%s, %s", link, err.Error())
-			return nil
-		}
-		s := doc.Find("li.j_thread_list.clearfix").Text()
-		fmt.Fprint(w, s)
-
-		t, err := template.ParseFiles("template/index.html")
-		if err != nil {
-			log.Fatal(err)
-		}
+//		doc, err := goquery.NewDocument(link)
+//		if err != nil {
+//			//logger.Error("解析页面失败：%s, %s", link, err.Error())
+//			log.Fatal(err)
+//		}
+		//s := doc.Find("li.j_thread_list.clearfix").Text()
+		//fmt.Fprint(w, s)
+		//log.Fatal(s)
 
 		data := struct {
 			Title string
 		}{
 			Title: "golang html template demo",
 		}
-		err = t.Execute(os.Stdout, data)
+		//err = t.Execute(os.Stdout, data)
+		err = homeTemplate.Execute(w, data)
 		if err != nil {
 			log.Fatal(err)
 		}
