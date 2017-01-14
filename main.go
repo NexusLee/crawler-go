@@ -6,11 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	//"reflect"
 	//"regexp"
 	"text/template"
 	"github.com/codegangsta/negroni"
 	"github.com/xyproto/mooseware"
-	//"github.com/PuerkitoBio/goquery"
+	"github.com/PuerkitoBio/goquery"
 )
 
 var (
@@ -38,19 +39,27 @@ func main() {
 
 	// 启动静态文件服务
 	//mux.HandleFunc("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	//mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		//link := "http://tieba.baidu.com/f?kw=%D3%A2%D3%EF"
-		//content, statusCode := httpGet(link)
-		//doc, err := newDocumentFromURL(link)
-//		doc, err := goquery.NewDocument(link)
-//		if err != nil {
-//			//logger.Error("解析页面失败：%s, %s", link, err.Error())
-//			log.Fatal(err)
-//		}
-		//s := doc.Find("li.j_thread_list.clearfix").Text()
-		//fmt.Fprint(w, s)
-		//log.Fatal(s)
+		link := "http://tieba.baidu.com/f?kw=%D3%A2%D3%EF"
+		doc, err := goquery.NewDocument(link)
+		if err != nil {
+			//logger.Error("解析页面失败：%s, %s", link, err.Error())
+			log.Fatal(err)
+		}
+
+		doc.Find("li.j_thread_list.clearfix").Each(func(i int, s *goquery.Selection) {
+			//title := s.Find(".threadlist_title").Text()
+			//log.Println("第", i + 1, "个帖子的标题：", title)
+			// 返回的是 *html.Node
+			topicNode, err := s.Find(".threadlist_title").Html()
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Println(topicNode)
+
+		})
 
 		data := struct {
 			Title string
