@@ -25,6 +25,8 @@ var homeTemplate *template.Template
 // This will store all the templates
 var templates *template.Template
 
+var arr []string
+
 func main() {
 	templates, err := template.ParseGlob("template/*.html")
 	if err != nil {
@@ -42,6 +44,8 @@ func main() {
 	//mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		arr := make([]string, 1)
+
 		link := "http://tieba.baidu.com/f?kw=%D3%A2%D3%EF"
 		doc, err := goquery.NewDocument(link)
 		if err != nil {
@@ -58,13 +62,15 @@ func main() {
 				log.Fatal(err)
 			}
 			log.Println(topicNode)
-
+			arr = append(arr, topicNode)
 		})
 
 		data := struct {
 			Title string
+			TopicNodes []string
 		}{
 			Title: "golang html template demo",
+			TopicNodes: arr,
 		}
 		//err = t.Execute(os.Stdout, data)
 		err = homeTemplate.Execute(w, data)
