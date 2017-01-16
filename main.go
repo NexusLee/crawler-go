@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"net/http/httputil"
+	"net/url"
 	//"reflect"
 	//"regexp"
 	"text/template"
@@ -79,6 +81,8 @@ func main() {
 		}
 	})
 
+	mux.HandleFunc("/p/", ProxyFunc)
+
 	n := negroni.Classic()
 
 	// Moose status
@@ -106,4 +110,17 @@ func httpGet(url string) (content string, statusCode int) {
 	statusCode = res.StatusCode
 	content = string(data)
 	return
+}
+
+func ProxyFunc(w http.ResponseWriter, r *http.Request) {
+	// change the request host to match the target
+	r.Host = "tieba.baidu.com"
+	u, _ := url.Parse("http://tieba.baidu.com/")
+	proxy := httputil.NewSingleHostReverseProxy(u)
+	// You can optionally capture/wrap the transport if that's necessary (for
+	// instance, if the transport has been replaced by middleware). Example:
+	// proxy.Transport = &myTransport{proxy.Transport}
+	//proxy.Transport = &myTransport{}
+
+	proxy.ServeHTTP(w, r)
 }
